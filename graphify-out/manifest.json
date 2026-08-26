@@ -1,0 +1,26 @@
+{
+  "tools/build_manifest.py": {
+    "mtime": 1787771231.1005206,
+    "seen": 1787772107.7070398,
+    "ast_hash": "5d55edd7db49ba0a47029f2625122a7e",
+    "semantic_hash": ""
+  },
+  ".agents/rules/graphify.md": {
+    "mtime": 1787738695.0378723,
+    "seen": 1787772107.7070515,
+    "ast_hash": "a0e4d192b9e2e17256124dbfc8e24e6a",
+    "semantic_hash": ""
+  },
+  ".agents/workflows/graphify.md": {
+    "mtime": 1787738695.0394595,
+    "seen": 1787772107.707057,
+    "ast_hash": "a831cf3669f1e6ab85d8a80ebe655f99",
+    "semantic_hash": ""
+  },
+  "Readme.md": {
+    "mtime": 1787760186.45701,
+    "seen": 1787772107.7070591,
+    "ast_hash": "0fdfed93f5e516649db61b2da1fa5eeb",
+    "semantic_hash": ""
+  }
+}
