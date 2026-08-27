@@ -36,3 +36,8 @@ reports/generated/
 # Graphify local-only data
 graphify-out/cost.json
 graphify-out/cache/
+
+
+#research paper
+metho.md
+methodology1.pdf
