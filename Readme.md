@@ -1,4 +1,4 @@
-# 🛡️ Malware & Ransomware Family Classification Pipeline
+# Malware & Ransomware Family Classification Pipeline
 
 [![Status](https://img.shields.io/badge/status-work--in--progress-yellow)](https://github.com/)
 [![Python](https://img.shields.io/badge/Python-3.10%2B-blue)](https://www.python.org/)
@@ -105,12 +105,12 @@ This project instead focuses on:
                                          │
                                          ▼
                             ┌────────────────────────┐
-                            │ Model Training &        │
-                            │ Evaluation              │
+                            │ Model Training &       │
+                            │ Evaluation             │
                             └────────────┬───────────┘
                                          │
                                          ▼
                             ┌────────────────────────┐
-                            │   Evasion Testing &     │
-                            │ Robustness Evaluation   │
+                            │   Evasion Testing &    │
+                            │ Robustness Evaluation  │
                             └────────────────────────┘

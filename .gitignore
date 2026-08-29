@@ -1,0 +1,43 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+env/
+
+# Secrets
+.env
+.env.*
+!.env.example
+
+# IDE / OS
+.vscode/
+.idea/
+*.swp
+Thumbs.db
+
+# Malware samples and binaries
+samples/
+malware/
+payloads/
+captures/
+*.exe
+*.dll
+*.bin
+*.zip
+*.7z
+
+# Generated analysis output
+logs/
+output/
+results/
+reports/generated/
+
+# Graphify local-only data
+graphify-out/cost.json
+graphify-out/cache/
+
+
+#research paper
+metho.md
+methodology1.pdf

@@ -1,0 +1,8 @@
+{
+  "0": "Malware & Ransomware Family Classification Pipeline",
+  "1": "build_manifest.py",
+  "2": "main",
+  "3": "rules/graphify.md",
+  "4": "workflows/graphify.md",
+  "5": "write_manifest"
+}
