@@ -1,26 +1,56 @@
 {
   "tools/build_manifest.py": {
-    "mtime": 1787771231.1005206,
-    "seen": 1787772107.7070398,
+    "mtime": 1787807112.9162939,
+    "seen": 1787853500.8590708,
     "ast_hash": "5d55edd7db49ba0a47029f2625122a7e",
     "semantic_hash": ""
   },
   ".agents/rules/graphify.md": {
-    "mtime": 1787738695.0378723,
-    "seen": 1787772107.7070515,
+    "mtime": 1787807112.9080026,
+    "seen": 1787853500.8590884,
     "ast_hash": "a0e4d192b9e2e17256124dbfc8e24e6a",
     "semantic_hash": ""
   },
   ".agents/workflows/graphify.md": {
-    "mtime": 1787738695.0394595,
-    "seen": 1787772107.707057,
+    "mtime": 1787807112.908512,
+    "seen": 1787853500.859092,
     "ast_hash": "a831cf3669f1e6ab85d8a80ebe655f99",
     "semantic_hash": ""
   },
   "Readme.md": {
-    "mtime": 1787760186.45701,
-    "seen": 1787772107.7070591,
+    "mtime": 1787807112.9106152,
+    "seen": 1787853500.8590946,
     "ast_hash": "0fdfed93f5e516649db61b2da1fa5eeb",
+    "semantic_hash": ""
+  },
+  "tools/acquire_samples.py": {
+    "mtime": 1787808164.2923877,
+    "seen": 1787853500.8590562,
+    "ast_hash": "fcbdddaab05b93e2c6e9b188b80bf41b",
+    "semantic_hash": ""
+  },
+  "tools/corpus_manifest.py": {
+    "mtime": 1788018662.226939,
+    "seen": 1788020008.3167384,
+    "ast_hash": "1765955c20dbed757c07e49c8f0a03b6",
+    "semantic_hash": ""
+  },
+  "tools/test_acquire_samples.py": {
+    "mtime": 1787808316.4988096,
+    "seen": 1787853500.85908,
+    "ast_hash": "551d9764579b4158fc6edd50975d9481",
+    "semantic_hash": ""
+  },
+  "tools/test_corpus_manifest.py": {
+    "mtime": 1787807458.6020186,
+    "seen": 1787853500.859083,
+    "ast_hash": "e43ee7bb877816da78b6cef407fda90f",
+    "semantic_hash": ""
+  },
+  "tools/SCHEMA.md": {
+    "mtime": 1788018664.2683356,
+    "seen": 1788020008.3167531,
+    "ast_hash": "e85db57993ff6c1080c9152009488c16",
     "semantic_hash": ""
   }
 }
