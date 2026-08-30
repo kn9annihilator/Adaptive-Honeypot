@@ -1,8 +1,13 @@
 {
   "0": "Malware & Ransomware Family Classification Pipeline",
   "1": "build_manifest.py",
-  "2": "main",
+  "2": "validate_record",
   "3": "rules/graphify.md",
   "4": "workflows/graphify.md",
-  "5": "write_manifest"
+  "5": "ManifestTests",
+  "6": "AcquisitionTests",
+  "7": "acquire_samples.py",
+  "8": "Corpus Manifest / Acquisition v2",
+  "9": "CorpusIdentityIndex",
+  "10": "CorpusIdentityIndex"
 }
