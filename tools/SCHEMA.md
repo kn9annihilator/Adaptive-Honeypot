@@ -1,70 +1,76 @@
-# Corpus Manifest / Acquisition v2
+# Corpus Acquisition v3
 
 ## Placement
 
-Put `acquire_samples.py`, `test_acquire_samples.py`, and this `SCHEMA.md` in:
+Put these in `D:\Honeypot\Codebase\tools\`:
 
-`D:\Honeypot\Codebase\tools\`
+- `acquire_samples.py`
+- `test_acquire_samples.py`
+- `reconcile_corpus.py` is not required in v3; reconciliation is exposed by `acquire_samples.py --reconcile`.
+- `SCHEMA.md`
 
 Keep `build_manifest.py` unchanged.
 
-## Acquisition model
+## MalwareBazaar transport
 
-Candidate discovery and acquisition are separate.
+`get_file` returns a password-protected ZIP. MalwareBazaar documents AES-128 encryption with password `infected`; `pyzipper` is required for AES extraction.
 
-`pending` in `candidate_manifest.csv` means that the candidate has not yet received an acquisition decision. It never means "download immediately".
+The transport ZIP is never hashed as the malware identity. The extracted member is the artifact whose SHA-256 must equal the expected MalwareBazaar SHA-256.
 
-Normal lifecycle:
+## Acquisition lifecycle
 
-`candidate -> queued -> download_started -> download_completed -> cryptographic_verification -> cryptographically_verified -> storage_started -> stored -> ready_for_analysis`
+`candidate -> queued -> download_started -> download_completed -> archive_validation -> archive_extracted -> cryptographic_verification -> cryptographically_verified -> storage_started -> stored -> ready_for_analysis`
 
-Alternate states:
+Failure/alternate states:
 
+- `candidate_rejected`
 - `duplicate`
-- `download_failed`
+- `archive_validation_failed`
 - `integrity_failed`
+- `download_failed`
 - `storage_failed`
 
-## Two validation boundaries
+## Candidate validation
 
-### 1. Candidate validation
+Candidate validation happens before network acquisition.
 
-Performed before network acquisition.
+IMPORTANT: rejection at this boundary is a scope/metadata decision during the validation period, NOT a cryptographic-integrity rejection.
 
-This can exclude a candidate for research-scope or metadata reasons (for example, a non-PE artifact). This is NOT a cryptographic-integrity rejection.
+## Integrity
 
-### 2. Cryptographic verification
+The extracted sample is hashed once before canonical storage.
 
-Performed after download.
+After the atomic staging-to-quarantine rename, the final canonical sample is hashed again. The final hash must equal the expected SHA-256 and the pre-commit calculated SHA-256.
 
-The SHA-256 calculated from the acquired sample must exactly match the expected MalwareBazaar SHA-256.
+## Storage/recovery
 
-The final file at its canonical storage path is hashed again after the storage commit.
+Downloads and extracted artifacts live temporarily under:
 
-## Storage transaction
+`Corpus\.staging\<transaction>\`
 
-Downloads are written under:
+The canonical sample is:
 
-`Corpus\.staging\<temporary-id>\sample`
+`Corpus\samples\quarantine\<SHA256>\sample`
 
-Only after cryptographic verification succeeds is the staging directory atomically renamed to:
+The staging directory is renamed atomically on the same filesystem.
 
-`Corpus\samples\quarantine\<SHA256>\`
+If JSONL persistence fails after canonical storage, the verified sample is retained rather than deleted. Run:
 
-The final file is hashed again after the rename.
+`python acquire_samples.py --reconcile`
 
-Only then is the validated record appended to:
+to detect:
 
-`Corpus\manifests\samples.jsonl`
+- canonical samples missing from `samples.jsonl`
+- manifest records whose canonical sample is missing
 
-If the process fails after canonical storage but before JSONL persistence, the verified sample is retained for audit/recovery rather than silently deleted. A later reconciliation step can identify such filesystem/manifest divergence.
+Reconciliation is check-only and does not mutate evidence.
 
-## Performance properties
+## Performance
 
-- SHA-256 uses 1 MiB streaming reads.
-- Corpus identity is loaded once into a set; membership is O(1).
-- The JSONL writer is opened once per acquisition run rather than once per sample.
-- Staging recovery scans only `Corpus\.staging`.
-- No full corpus rescan occurs for each sample.
-- No sample is loaded entirely into memory.
-- No sample is executed.
+- 1 MiB streaming I/O for download, extraction, and hashing.
+- No full sample is loaded into RAM.
+- Candidate manifest is read once.
+- Corpus identity is scanned once.
+- JSONL writer is opened once per acquisition run.
+- Reconciliation scans only the manifest and canonical quarantine tree.
+- No polling, sleeps, or per-sample corpus rescans.
