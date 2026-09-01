@@ -1,12 +1,5 @@
 #!/usr/bin/env python3
-"""
-Controlled MalwareBazaar acquisition with crash-recovery safeguards.
-
-Place beside corpus_manifest.py in:
-D:\\Honeypot\\Codebase\\tools\\
-
-This module never executes downloaded samples.
-"""
+"""Controlled MalwareBazaar acquisition with AES-ZIP extraction and recovery checks."""
 
 from __future__ import annotations
 
@@ -18,6 +11,7 @@ import os
 import shutil
 import sys
 import tempfile
+from dataclasses import dataclass, fields
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -27,19 +21,38 @@ TOOLS_DIR = Path(__file__).resolve().parent
 PROJECT_ROOT = TOOLS_DIR.parent
 CORPUS_ROOT = PROJECT_ROOT.parent / "Corpus"
 
-CANDIDATE_MANIFEST = (
-    PROJECT_ROOT / "Dataset" / "bootstrap" / "MalwareBazaar"
-    / "metadata" / "candidate_manifest.csv"
-)
+CANDIDATE_MANIFEST = PROJECT_ROOT / "Dataset" / "bootstrap" / "MalwareBazaar" / "metadata" / "candidate_manifest.csv"
 SAMPLES_MANIFEST = CORPUS_ROOT / "manifests" / "samples.jsonl"
 ACQUISITION_LOG = CORPUS_ROOT / "manifests" / "acquisition.log"
 QUARANTINE_ROOT = CORPUS_ROOT / "samples" / "quarantine"
-REJECTED_ROOT = CORPUS_ROOT / "samples" / "rejected"
 STAGING_ROOT = CORPUS_ROOT / ".staging"
 
 API_URL = "https://mb-api.abuse.ch/api/v1/"
+ZIP_PASSWORD = b"infected"
 CHUNK_SIZE = 1024 * 1024
 SHA256_LEN = 64
+
+
+@dataclass(slots=True)
+class AcquisitionStats:
+    candidates_considered: int = 0
+    candidates_eligible: int = 0
+    queued: int = 0
+    downloads_completed: int = 0
+    cryptographically_verified: int = 0
+    stored: int = 0
+    duplicates: int = 0
+    candidate_validation_rejected: int = 0
+    archive_validation_failed: int = 0
+    integrity_failed: int = 0
+    download_failed: int = 0
+    storage_failed: int = 0
+
+    def print(self) -> None:
+        for field in fields(self):
+            name = field.name
+            value = getattr(self, name)
+            print(f"{name.replace('_', ' ').title()}: {value}")
 
 
 def utc_now() -> str:
@@ -70,7 +83,7 @@ def sha256_file(path: Path) -> str:
 
 
 class CorpusIdentityIndex:
-    """Single manifest scan; O(1) SHA-256 membership thereafter."""
+    """One manifest scan; O(1) membership after initialization."""
 
     __slots__ = ("_sha256",)
 
@@ -83,8 +96,7 @@ class CorpusIdentityIndex:
                 if not line.strip():
                     continue
                 try:
-                    record = json.loads(line)
-                    value = record["identity"]["sha256"].lower()
+                    value = json.loads(line)["identity"]["sha256"].lower()
                     if valid_sha256(value):
                         self._sha256.add(value)
                 except (json.JSONDecodeError, KeyError, TypeError):
@@ -113,8 +125,8 @@ def candidate_is_valid(row: dict[str, str]) -> tuple[bool, str]:
     """
     Candidate-stage validation.
 
-    IMPORTANT: rejection here is a research-scope/metadata decision during
-    the validation period, NOT a cryptographic-integrity rejection.
+    IMPORTANT: rejection here is a scope/metadata decision during the
+    validation period, NOT a cryptographic-integrity rejection.
     """
     if row.get("selected") != "pending":
         return False, row.get("exclusion_reason") or "not_selected"
@@ -129,7 +141,7 @@ def candidate_is_valid(row: dict[str, str]) -> tuple[bool, str]:
     return True, ""
 
 
-def download_sample(api_key: str, expected_sha256: str, destination: Path) -> None:
+def download_archive(api_key: str, expected_sha256: str, destination: Path) -> None:
     response = requests.post(
         API_URL,
         headers={"Auth-Key": api_key},
@@ -143,6 +155,45 @@ def download_sample(api_key: str, expected_sha256: str, destination: Path) -> No
         for chunk in response.iter_content(chunk_size=CHUNK_SIZE):
             if chunk:
                 fh.write(chunk)
+
+
+def extract_sample(archive_path: Path, output_path: Path) -> str:
+    """Extract exactly one regular AES-ZIP member to a fixed safe path.
+
+    Member paths are never used as filesystem paths, preventing ZIP path
+    traversal. Extraction is streamed to avoid loading the sample into RAM.
+    """
+    try:
+        import pyzipper
+    except ImportError as exc:
+        raise RuntimeError(
+            "pyzipper is required for MalwareBazaar AES-128 ZIP extraction. "
+            "Install with: python -m pip install pyzipper"
+        ) from exc
+
+    with pyzipper.AESZipFile(archive_path, "r") as zf:
+        members = [info for info in zf.infolist() if not info.is_dir()]
+        if len(members) != 1:
+            raise ValueError(f"expected_one_file_in_archive:{len(members)}")
+
+        info = members[0]
+        zf.setpassword(ZIP_PASSWORD)
+
+        output_path.parent.mkdir(parents=True, exist_ok=True)
+        with zf.open(info, "r") as src, output_path.open("wb") as dst:
+            shutil.copyfileobj(src, dst, length=CHUNK_SIZE)
+
+        if not output_path.exists() or output_path.stat().st_size == 0:
+            raise ValueError("empty_extracted_sample")
+
+        return info.filename
+
+
+def verify_hash(path: Path, expected_sha256: str) -> str:
+    calculated = sha256_file(path)
+    if calculated.lower() != expected_sha256.lower():
+        raise ValueError(f"sha256_mismatch:{calculated}")
+    return calculated
 
 
 def build_record(row: dict[str, str], calculated_sha256: str) -> dict:
@@ -190,20 +241,19 @@ def build_record(row: dict[str, str], calculated_sha256: str) -> dict:
 
 
 def recover_staging() -> int:
-    """Remove only abandoned staging data; canonical samples are never deleted here."""
+    """Delete only abandoned staging transactions; never touch canonical samples."""
     if not STAGING_ROOT.exists():
         return 0
     removed = 0
-    for child in STAGING_ROOT.iterdir():
-        if child.is_dir():
-            shutil.rmtree(child, ignore_errors=True)
-            removed += 1
-        else:
-            try:
+    for child in list(STAGING_ROOT.iterdir()):
+        try:
+            if child.is_dir():
+                shutil.rmtree(child)
+            else:
                 child.unlink()
-                removed += 1
-            except OSError:
-                pass
+            removed += 1
+        except OSError:
+            pass
     try:
         STAGING_ROOT.rmdir()
     except OSError:
@@ -211,140 +261,178 @@ def recover_staging() -> int:
     return removed
 
 
-def verify_final_sample(path: Path, expected: str) -> str:
-    calculated = sha256_file(path)
-    if calculated.lower() != expected.lower():
-        raise RuntimeError(f"final_storage_hash_mismatch:{calculated}")
-    return calculated
+def reconcile_corpus() -> tuple[list[str], list[str]]:
+    """Return (orphan_sample_hashes, manifest_records_missing_files)."""
+    manifest_hashes: set[str] = set()
+    if SAMPLES_MANIFEST.exists():
+        with SAMPLES_MANIFEST.open("r", encoding="utf-8") as fh:
+            for line in fh:
+                if not line.strip():
+                    continue
+                try:
+                    rec = json.loads(line)
+                    value = rec["identity"]["sha256"].lower()
+                    if valid_sha256(value):
+                        manifest_hashes.add(value)
+                except (json.JSONDecodeError, KeyError, TypeError):
+                    continue
+
+    canonical: set[str] = set()
+    if QUARANTINE_ROOT.exists():
+        for d in QUARANTINE_ROOT.iterdir():
+            if d.is_dir() and valid_sha256(d.name) and (d / "sample").is_file():
+                canonical.add(d.name.lower())
+
+    return sorted(canonical - manifest_hashes), sorted(manifest_hashes - canonical)
 
 
-def acquire(api_key: str, limit: int, dry_run: bool) -> None:
+def acquire(api_key: str, limit: int, dry_run: bool) -> AcquisitionStats:
     if not CANDIDATE_MANIFEST.exists():
         raise FileNotFoundError(f"Candidate manifest not found: {CANDIDATE_MANIFEST}")
 
-    # Recovery is O(number of staging entries), not O(number of corpus samples).
     recovered = recover_staging()
     if recovered:
         print(f"Recovered abandoned staging entries: {recovered}")
 
     identity = CorpusIdentityIndex()
-    selected = stored = duplicates = rejected = failed = 0
+    stats = AcquisitionStats()
 
-    # Keep one writer for the entire run. This avoids rescanning/reopening the
-    # JSONL manifest for every sample.
-    try:
-        from corpus_manifest import JsonlManifestWriter
-        writer = JsonlManifestWriter(SAMPLES_MANIFEST)
-    except ImportError as exc:
-        raise RuntimeError(
-            "corpus_manifest.py must be available beside acquire_samples.py"
-        ) from exc
+    from corpus_manifest import JsonlManifestWriter
+    writer = JsonlManifestWriter(SAMPLES_MANIFEST)
 
     with CANDIDATE_MANIFEST.open("r", newline="", encoding="utf-8-sig") as fh:
         for row in csv.DictReader(fh):
-            if limit and selected >= limit:
+            stats.candidates_considered += 1
+            if limit and stats.candidates_eligible >= limit:
                 break
 
             valid, reason = candidate_is_valid(row)
             expected = (row.get("sha256") or "").strip().lower()
 
             if not valid:
-                rejected += 1
+                stats.candidate_validation_rejected += 1
                 if expected:
                     log_event(expected, "candidate_rejected", reason)
                 continue
 
-            selected += 1
+            stats.candidates_eligible += 1
 
-            if identity.contains(expected):
-                duplicates += 1
+            if identity.contains(expected) or (QUARANTINE_ROOT / expected / "sample").is_file():
+                stats.duplicates += 1
                 log_event(expected, "duplicate", "already_in_corpus")
                 continue
 
+            stats.queued += 1
             log_event(expected, "queued")
+
             if dry_run:
                 print(f"[DRY-RUN] queued {expected}")
                 continue
 
             STAGING_ROOT.mkdir(parents=True, exist_ok=True)
             stage_dir = Path(tempfile.mkdtemp(prefix=f"{expected[:12]}_", dir=STAGING_ROOT))
-            temp_path = stage_dir / "sample"
+            archive_path = stage_dir / "archive.zip"
+            sample_path = stage_dir / "sample"
             final_dir = QUARANTINE_ROOT / expected
             final_path = final_dir / "sample"
 
             try:
                 log_event(expected, "download_started")
-                download_sample(api_key, expected, temp_path)
-
-                if not temp_path.exists() or temp_path.stat().st_size == 0:
-                    raise RuntimeError("empty_download")
-                log_event(expected, "download_completed")
-
-                log_event(expected, "cryptographic_verification")
-                calculated = sha256_file(temp_path)
-                if calculated.lower() != expected:
-                    log_event(
-                        expected, "integrity_failed",
-                        f"calculated_sha256={calculated}",
-                    )
-                    rejected += 1
+                try:
+                    download_archive(api_key, expected, archive_path)
+                    if not archive_path.is_file() or archive_path.stat().st_size == 0:
+                        raise ValueError("empty_download")
+                    stats.downloads_completed += 1
+                    log_event(expected, "download_completed")
+                except Exception as exc:
+                    stats.download_failed += 1
+                    log_event(expected, "download_failed", type(exc).__name__)
+                    print(f"[DOWNLOAD FAILED] {expected}: {exc}", file=sys.stderr)
                     continue
-                log_event(expected, "cryptographically_verified")
 
-                # Re-check immediately before commit to close the normal
-                # check-then-create race without introducing locks/coordination.
+                try:
+                    log_event(expected, "archive_validation")
+                    extract_name = extract_sample(archive_path, sample_path)
+                    log_event(expected, "archive_extracted", extract_name)
+                except Exception as exc:
+                    stats.archive_validation_failed += 1
+                    log_event(expected, "archive_validation_failed", type(exc).__name__)
+                    print(f"[ARCHIVE FAILED] {expected}: {exc}", file=sys.stderr)
+                    continue
+
+                try:
+                    log_event(expected, "cryptographic_verification")
+                    calculated = verify_hash(sample_path, expected)
+                    stats.cryptographically_verified += 1
+                    log_event(expected, "cryptographically_verified")
+                except Exception as exc:
+                    stats.integrity_failed += 1
+                    log_event(expected, "integrity_failed", str(exc))
+                    print(f"[INTEGRITY FAILED] {expected}: {exc}", file=sys.stderr)
+                    continue
+
                 if identity.contains(expected) or final_dir.exists():
-                    duplicates += 1
+                    stats.duplicates += 1
                     log_event(expected, "duplicate", "appeared_during_acquisition")
                     continue
 
-                log_event(expected, "storage_started")
-                QUARANTINE_ROOT.mkdir(parents=True, exist_ok=True)
+                try:
+                    log_event(expected, "storage_started")
+                    QUARANTINE_ROOT.mkdir(parents=True, exist_ok=True)
+                    os.replace(stage_dir, final_dir)
 
-                # The staging directory is on the same filesystem as Corpus,
-                # so os.replace gives an atomic directory rename on Windows.
-                os.replace(stage_dir, final_dir)
+                    final_calculated = verify_hash(final_path, expected)
+                    if final_calculated.lower() != calculated.lower():
+                        raise ValueError("post_commit_hash_changed")
 
-                # Verify the exact file now present at its canonical path.
-                verify_final_sample(final_path, expected)
+                    record = build_record(row, final_calculated)
+                    writer.append(record)
+                    identity.add(expected)
 
-                record = build_record(row, expected)
-                writer.append(record)
-                identity.add(expected)
-
-                log_event(expected, "stored")
-                log_event(expected, "ready_for_analysis")
-                stored += 1
-
-            except Exception as exc:
-                failed += 1
-                # If final storage exists but the manifest append failed, leave
-                # the canonical bytes intact for recovery/audit; never silently
-                # delete a verified sample. The next run can detect the orphan.
-                log_event(expected, "acquisition_failed", type(exc).__name__)
-                print(f"[FAILED] {expected}: {exc}", file=sys.stderr)
+                    stats.stored += 1
+                    log_event(expected, "stored")
+                    log_event(expected, "ready_for_analysis")
+                except Exception as exc:
+                    stats.storage_failed += 1
+                    log_event(expected, "storage_failed", type(exc).__name__)
+                    print(f"[STORAGE FAILED] {expected}: {exc}", file=sys.stderr)
+                    # Never delete a canonical sample merely because JSONL
+                    # persistence failed; reconciliation will surface it.
+                    continue
             finally:
                 if stage_dir.exists():
                     shutil.rmtree(stage_dir, ignore_errors=True)
 
-    print(
-        f"Selected={selected} Stored={stored} Duplicates={duplicates} "
-        f"Rejected={rejected} Failed={failed}"
-    )
+    stats.print()
+    return stats
 
 
 def main() -> None:
     parser = argparse.ArgumentParser(
-        description="Acquire and cryptographically verify MalwareBazaar candidates."
+        description="Acquire MalwareBazaar samples with AES-ZIP extraction and SHA-256 verification."
     )
     parser.add_argument("--limit", type=int, default=0,
-                        help="Maximum eligible candidates; 0 means all.")
+                        help="Maximum eligible candidates to process; 0 means all.")
     parser.add_argument("--dry-run", action="store_true",
                         help="Validate/queue only; never download.")
+    parser.add_argument("--reconcile", action="store_true",
+                        help="Check canonical quarantine against samples.jsonl; no mutation.")
     args = parser.parse_args()
 
     try:
+        if args.reconcile:
+            orphan, missing = reconcile_corpus()
+            print(f"Orphan canonical samples: {len(orphan)}")
+            print(f"Manifest records missing files: {len(missing)}")
+            for value in orphan:
+                print(f"ORPHAN_SAMPLE {value}")
+            for value in missing:
+                print(f"MISSING_FILE {value}")
+            raise SystemExit(1 if orphan or missing else 0)
+
         acquire(load_api_key(), args.limit, args.dry_run)
+    except SystemExit:
+        raise
     except Exception as exc:
         print(f"ERROR: {exc}", file=sys.stderr)
         raise SystemExit(1)
