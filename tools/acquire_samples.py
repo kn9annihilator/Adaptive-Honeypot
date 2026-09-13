@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+﻿#!/usr/bin/env python3
 """
 Controlled MalwareBazaar acquisition.
 
@@ -46,7 +46,7 @@ CANDIDATE_MANIFEST = (
     / "bootstrap"
     / "MalwareBazaar"
     / "metadata"
-    / "candidate_manifest.csv"
+    / "primary_acquisition.csv"
 )
 
 SAMPLES_MANIFEST = (
