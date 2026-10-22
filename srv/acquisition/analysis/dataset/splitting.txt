@@ -1,0 +1,6 @@
+root@ubserver:/srv/acquisition# ls -lh /srv/acquisition/analysis/dataset/
+total 2.2M
+-rw-r--r-- 1 root root 114K Sep 21 04:51 split_manifest.csv
+-rw-r--r-- 1 root root 336K Sep 21 04:51 test.csv
+-rw-r--r-- 1 root root 1.5M Sep 21 04:51 train.csv
+-rw-r--r-- 1 root root 275K Sep 21 04:51 validation.csv
