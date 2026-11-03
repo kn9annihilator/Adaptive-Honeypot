@@ -1,0 +1,104 @@
+{
+  "tools/build_manifest.py": {
+    "mtime": 1787807112.9162939,
+    "seen": 1787853500.8590708,
+    "ast_hash": "5d55edd7db49ba0a47029f2625122a7e",
+    "semantic_hash": ""
+  },
+  ".agents/rules/graphify.md": {
+    "mtime": 1787807112.9080026,
+    "seen": 1787853500.8590884,
+    "ast_hash": "a0e4d192b9e2e17256124dbfc8e24e6a",
+    "semantic_hash": ""
+  },
+  ".agents/workflows/graphify.md": {
+    "mtime": 1787807112.908512,
+    "seen": 1787853500.859092,
+    "ast_hash": "a831cf3669f1e6ab85d8a80ebe655f99",
+    "semantic_hash": ""
+  },
+  "Readme.md": {
+    "mtime": 1787807112.9106152,
+    "seen": 1787853500.8590946,
+    "ast_hash": "0fdfed93f5e516649db61b2da1fa5eeb",
+    "semantic_hash": ""
+  },
+  "tools/acquire_samples.py": {
+    "mtime": 1788431376.2061322,
+    "seen": 1788631105.5418737,
+    "ast_hash": "e3602733589e15861398a18f99f5af03",
+    "semantic_hash": ""
+  },
+  "tools/corpus_manifest.py": {
+    "mtime": 1788248225.2079458,
+    "seen": 1788248674.316378,
+    "ast_hash": "87d62a400fd5f927d03667b0adbf4d45",
+    "semantic_hash": ""
+  },
+  "tools/test_acquire_samples.py": {
+    "mtime": 1788248263.707077,
+    "seen": 1788248674.3163798,
+    "ast_hash": "03a5f014998a1628dfcef03830d6af7c",
+    "semantic_hash": ""
+  },
+  "tools/test_corpus_manifest.py": {
+    "mtime": 1788028544.5923991,
+    "seen": 1788169088.8237424,
+    "ast_hash": "f351cfad4d9fd5e762a767ad7448d75b",
+    "semantic_hash": ""
+  },
+  "tools/SCHEMA.md": {
+    "mtime": 1788246690.8926673,
+    "seen": 1788248674.3163898,
+    "ast_hash": "7086a57d79f43af588c5e8087c9ce589",
+    "semantic_hash": ""
+  },
+  "tools/requirements-acquisition.txt": {
+    "mtime": 1788372717.7581995,
+    "seen": 1788631105.5419154,
+    "ast_hash": "a66bce1470146766b34fb5ebbfdf7061",
+    "semantic_hash": ""
+  },
+  "tools/family_availability.py": {
+    "mtime": 1788368649.6197827,
+    "seen": 1788369963.0020957,
+    "ast_hash": "637863ba0131442d9f536d2da5ee191f",
+    "semantic_hash": ""
+  },
+  "tools/family_temporal_audit.py": {
+    "mtime": 1788369931.3910592,
+    "seen": 1788369963.0021014,
+    "ast_hash": "b095b077509d7f9a94129378aa1dd1ab",
+    "semantic_hash": ""
+  },
+  "tools/family_label_audit.py": {
+    "mtime": 1788371326.101686,
+    "seen": 1788372651.59238,
+    "ast_hash": "06d3eeb5aa1a8264c5b80cc3b18964bb",
+    "semantic_hash": ""
+  },
+  "tools/family_metadata_quality.py": {
+    "mtime": 1788370514.6631207,
+    "seen": 1788372651.592382,
+    "ast_hash": "a63982a35155e1c30fab68b5123a6815",
+    "semantic_hash": ""
+  },
+  "Dataset/bootstrap/MalwareBazaar/metadata/acquisition_plan_summary.json": {
+    "mtime": 1788430355.6472414,
+    "seen": 1788631105.5418634,
+    "ast_hash": "78d6c58d56aec5ad203c7b1a513fbbad",
+    "semantic_hash": ""
+  },
+  "tools/prepare_primary_acquisition.py": {
+    "mtime": 1788432782.2172008,
+    "seen": 1788631105.5418983,
+    "ast_hash": "689a1631232e1796aadc0cb263b53e37",
+    "semantic_hash": ""
+  },
+  "tools/research_acquisition_plan.py": {
+    "mtime": 1788432783.3748336,
+    "seen": 1788631105.541901,
+    "ast_hash": "26b9af3d16d8df93398f81224d4d45b4",
+    "semantic_hash": ""
+  }
+}

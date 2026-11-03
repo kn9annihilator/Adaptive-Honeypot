@@ -1,0 +1,19 @@
+{
+  "0": "Malware & Ransomware Family Classification Pipeline",
+  "1": "build_manifest.py",
+  "2": "research_acquisition_plan_v2.py",
+  "3": "rules/graphify.md",
+  "4": "workflows/graphify.md",
+  "5": "validate_record",
+  "6": "family_availability.py",
+  "7": "acquire_samples.py",
+  "8": "Corpus Acquisition v3",
+  "9": "family_metadata_quality.py",
+  "10": "AcquisitionV32Tests",
+  "11": "family_temporal_audit.py",
+  "12": "family_label_audit.py",
+  "13": "research_acquisition_plan.py",
+  "14": "diagnose_family_queries.py",
+  "15": "diagnose_family_tags.py",
+  "16": "pe_availability_probe.py"
+}
