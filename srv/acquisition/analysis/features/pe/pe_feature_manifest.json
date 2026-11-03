@@ -1,0 +1,48 @@
+{
+    "fitting_policy": "Numerical scaling and architecture encoding are fitted exclusively on the training split. Validation and test are transformed using the fitted training preprocessor.",
+    "numeric_features": [
+        "file_size",
+        "number_of_sections",
+        "characteristics",
+        "entry_point",
+        "image_base",
+        "size_of_image",
+        "size_of_headers",
+        "subsystem",
+        "dll_characteristics",
+        "executable_sections",
+        "readable_sections",
+        "writable_sections",
+        "total_raw_section_size",
+        "total_virtual_section_size",
+        "mean_section_entropy",
+        "min_section_entropy",
+        "max_section_entropy",
+        "imported_dll_count",
+        "imported_api_count",
+        "unique_imported_api_count"
+    ],
+    "categorical_features": [
+        "architecture"
+    ],
+    "excluded_features": [
+        "sha256",
+        "machine",
+        "timestamp",
+        "family",
+        "SHA verification"
+    ],
+    "train_shape": [
+        1132,
+        22
+    ],
+    "validation_shape": [
+        243,
+        22
+    ],
+    "test_shape": [
+        243,
+        22
+    ],
+    "feature_count": 22
+}

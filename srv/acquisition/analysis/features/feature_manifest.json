@@ -1,0 +1,57 @@
+{
+    "random_state": 42,
+    "vectorizer_parameters": {
+        "ngram_range": [
+            1,
+            1
+        ],
+        "min_df": 1,
+        "max_df": 1.0,
+        "sublinear_tf": true,
+        "norm": "l2",
+        "lowercase": false,
+        "token_separator": "|",
+        "dtype": "float32"
+    },
+    "fitting_policy": "TF-IDF vectorizers are fitted exclusively on the training split. Validation and test splits are transformed using the fitted training vectorizers.",
+    "representations": {
+        "imported_dll_names": {
+            "vocabulary_size": 78,
+            "train_shape": [
+                1132,
+                78
+            ],
+            "validation_shape": [
+                243,
+                78
+            ],
+            "test_shape": [
+                243,
+                78
+            ],
+            "train_nnz": 5170,
+            "validation_nnz": 1085,
+            "test_nnz": 1173,
+            "vectorizer": "/srv/acquisition/analysis/features/tfidf/imported_dll_names_vectorizer.joblib"
+        },
+        "imported_api_names": {
+            "vocabulary_size": 2715,
+            "train_shape": [
+                1132,
+                2715
+            ],
+            "validation_shape": [
+                243,
+                2715
+            ],
+            "test_shape": [
+                243,
+                2715
+            ],
+            "train_nnz": 78459,
+            "validation_nnz": 14263,
+            "test_nnz": 17978,
+            "vectorizer": "/srv/acquisition/analysis/features/tfidf/imported_api_names_vectorizer.joblib"
+        }
+    }
+}
