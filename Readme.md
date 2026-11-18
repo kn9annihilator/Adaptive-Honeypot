@@ -431,19 +431,8 @@ Before submitting changes:
 
 A license will be added once the repository's distribution and contribution requirements have been finalized.
 
-Until then, no permission to reuse, modify, or redistribute the code should be assumed.
-
-## Acknowledgements
-
-This work is conducted as part of cybersecurity research at Sharda University.
-
-The project uses publicly available malware intelligence metadata and open-source security and machine-learning tools.
-
 ---
 
-<p align="center">
-  <strong>Detection identifies the threat. Classification investigates its family.</strong>
-</p>
 
 <p align="center">
   <sub>Adaptive-Honeypot · Windows Malware Research · Active Development</sub>
