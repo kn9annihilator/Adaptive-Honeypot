@@ -362,7 +362,6 @@ Recommended precautions:
 - Disable shared folders and unnecessary host integration.
 - Avoid bridged networking during malware execution.
 - Use controlled network simulation where appropriate.
-- Maintain VM snapshots and clean recovery states.
 - Never execute unknown samples on production or personal systems.
 
 Researchers are responsible for complying with applicable laws, institutional policies, and malware-handling requirements.
