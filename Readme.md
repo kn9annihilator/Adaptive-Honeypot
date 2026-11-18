@@ -407,11 +407,6 @@ The planned development direction includes:
 - [ ] Conduct additional ablation and error analysis.
 - [ ] Integrate the research components into the broader Adaptive-Honeypot framework.
 
-## Research Publication
-
-**Research Title:** Windows Malware Family Classification: An Empirical Evaluation of Static Feature Representations and Classification Models.
-
-Publication details and the final paper will be added when available.
 
 ## Contributing
 
