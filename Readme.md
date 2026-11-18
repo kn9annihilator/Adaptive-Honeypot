@@ -362,7 +362,6 @@ Recommended precautions:
 - Disable shared folders and unnecessary host integration.
 - Avoid bridged networking during malware execution.
 - Use controlled network simulation where appropriate.
-- Maintain VM snapshots and clean recovery states.
 - Never execute unknown samples on production or personal systems.
 
 Researchers are responsible for complying with applicable laws, institutional policies, and malware-handling requirements.
@@ -399,19 +398,14 @@ The planned development direction includes:
 - [x] Static feature engineering.
 - [x] Classical machine-learning baselines.
 - [x] Static MLP experiments.
-- [ ] Complete final-test evaluation across selected configurations.
-- [ ] Expand dynamic malware behavior collection.
-- [ ] Develop behavioral sequence representations.
+- [x] Complete final-test evaluation across selected configurations.
+- [x] Expand dynamic malware behavior collection.
+- [x] Develop behavioral sequence representations.
 - [ ] Implement CNN-LSTM classification.
 - [ ] Perform comparative static and dynamic evaluation.
 - [ ] Conduct additional ablation and error analysis.
 - [ ] Integrate the research components into the broader Adaptive-Honeypot framework.
 
-## Research Publication
-
-**Research Title:** Windows Malware Family Classification: An Empirical Evaluation of Static Feature Representations and Classification Models.
-
-Publication details and the final paper will be added when available.
 
 ## Contributing
 
