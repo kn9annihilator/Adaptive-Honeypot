@@ -431,8 +431,6 @@ Before submitting changes:
 
 A license will be added once the repository's distribution and contribution requirements have been finalized.
 
-Until then, no permission to reuse, modify, or redistribute the code should be assumed.
-
 ---
 
 
