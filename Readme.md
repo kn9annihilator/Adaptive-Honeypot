@@ -399,9 +399,9 @@ The planned development direction includes:
 - [x] Static feature engineering.
 - [x] Classical machine-learning baselines.
 - [x] Static MLP experiments.
-- [ ] Complete final-test evaluation across selected configurations.
-- [ ] Expand dynamic malware behavior collection.
-- [ ] Develop behavioral sequence representations.
+- [x] Complete final-test evaluation across selected configurations.
+- [x] Expand dynamic malware behavior collection.
+- [x] Develop behavioral sequence representations.
 - [ ] Implement CNN-LSTM classification.
 - [ ] Perform comparative static and dynamic evaluation.
 - [ ] Conduct additional ablation and error analysis.
